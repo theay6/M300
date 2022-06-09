@@ -4,6 +4,9 @@
 
 ###    ###   ###   ###   ###
 
+sudo apt-get-update
+sudo apt-get upgrade
+
 sudo apt install isc-dhcp-server
 
 ---- always good to backup original configuration files ----
