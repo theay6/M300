@@ -1,0 +1,89 @@
+---- proftpd installation ----
+sudo apt-get install proftpd
+
+---- edit conf file ----
+sudo vi /etc/proftpd/proftpd.conf
+
+---- add file inhalt ----
+------------------------------------------------------------------------------------
+
+Include /etc/proftpd/modules.conf
+
+UseIPv6                         on
+IdentLookups                    off
+
+ServerName                      "sftp.smartlearn.dmz"
+DisplayLogin                    "Willkomen auf den FTP Server des M300"
+ServerType                      standalone
+DeferWelcome                    off
+
+MultilineRFC2228                on
+DefaultServer                   on
+ShowSymlinks                    on
+
+TimeoutNoTransfer               600
+TimeoutStalled                  600
+TimeoutIdle                     1200
+
+DisplayLogin                    welcome.msg
+DisplayChdir                    .message true
+ListOptions                     "-l"
+
+DenyFilter                      \*.*/
+
+DefaultRoot                     ~
+Port                            21
+
+<IfModule mod_dynmasq.c>
+# DynMasqRefresh 28800
+</IfModule>
+
+MaxInstances                    30
+
+User                            ftpuser
+Group                           nogroup
+Umask                           022  022
+AllowOverwrite                  on
+AuthOrder                       mod_auth_pam.c* mod_auth_unix.c
+
+TransferLog /var/log/proftpd/xferlog
+SystemLog   /var/log/proftpd/proftpd.log
+
+<IfModule mod_quotatab.c>
+QuotaEngine off
+</IfModule>
+
+<IfModule mod_ratio.c>
+Ratios off
+</IfModule>
+
+<IfModule mod_delay.c>
+DelayEngine on
+</IfModule>
+
+<IfModule mod_ctrls.c>
+ControlsEngine        off
+ControlsMaxClients    2
+ControlsLog           /var/log/proftpd/controls.log
+ControlsInterval      5
+ControlsSocket        /var/run/proftpd/proftpd.sock
+</IfModule>
+
+<IfModule mod_ctrls_admin.c>
+AdminControlsEngine off
+</IfModule>
+   RequireValidShell            on
+Include /etc/proftpd/conf.d/
+Include /etc/proftpd/tls.conf
+
+<Limit LOGIN>
+        DenyGroup !ftpuser
+</Limit>
+
+------------------------------------------------------------------------------------
+
+---- add user ----
+
+cd /etc/proftpd/
+
+sudo ftpasswd --passwd --name ftpuser --uid 1001 --home /pfad/zum/userdir --shell /bin/false
