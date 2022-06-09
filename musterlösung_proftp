@@ -128,3 +128,25 @@ SFTPHostKey /etc/ssh/sftp host dsa key
 SFTPAuthorizedUserKeys file: /etc/proftpd/authorized keys/%u
 Enable compression
 SFTPCompression delayed
+# Default is: publickey password
+SFTPAuthMethods publickey
+password
+</IfModule>
+mkdir /etc/proftpd/authorized_ keys/
+systemctl restart proftpd
+testen mit
+sftp
+-P 2222 ftpuser@vmls3 oder grafischem Klient
+"normales FTP"
+abschalten
+======:::::::
+======:::::::
+cd /etc/proftpd
+nano nano proftpd.conf
+Port
+anwei sung auskommentieren:
+#Port
+21
+systemctl restart proftpd
+testen! ftp darf nicht mehr gehen
+
