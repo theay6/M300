@@ -4,10 +4,50 @@ apt-get upgrade
 apt-get install apache2
 
 ----apache konfiguration ----
-#/etc/apache2/apache2.conf ergänzen
-〈Directory "/www/"〉
-  Options Indexes FollowSymLinks
-  Require all granted
-〈/Directory〉
+#/etc/apache2/apache2. conf ergänzen
+‹Directory "/www/">
+Options
+Indexes FollowSymLinks
+Require all granted
+</Directory>
+
+# Konfiguarionen für virtuelle Hosts erstellen
+/etc/apachez/sites-available/beispiel.lan.conf
+VirtualHost * : 80>
+ServerName beispiel. lan
+ServerAlias www.beispiel.lan www2.beispiel.lan
+ServerAdmin webmaster@gibbix. dmz
+DocumentRoot/www/www.beispiel.lan
+ErrorDocument404 /err/404.html
+Errorlog $(APACHE LOG DIR)/beispiel.lan-error. log
+CustomLog
+§(APACHE LOG DIR)/beispiel.lan-access. log combined
+</VirtualHost>
+
+---- User erstellen, Verzeichnisse berechtigen ----
+root@vmLS3:~#
+groupadd wwwadmin
+root@vmLS3: ~# usermod -aG wwwadmin vmadmin
+root@vmLS3 : ~# chmod -R ug+rwX, o-rw /www/*
+(User und Gruppe zum schreiben berechtigen, anderen Rechte entziehen)
+root@vmLS3:~# chown
+-R www-data:wwwadmin/www/*
+(User und Gruppe setzen)
+
+---- Site aufschalten Apache Neustart ----
+rootevmLS3:~# a2ensite beispiel.lan
+root@vmLS3: ~# systemetl restart apache2. service
+
+---- DNS im vmLS3 anpassen ----
+Fehlende Hostnamen kul.gibbix.lan, etc im zonenfile eintragen
+(als A oder CNAME Record)
+Seriennummer
+erhöhen,
+Bind neu starten
+root@vmLS3: ~# systemetl restart bind9.service
+
+
+
+
 
 
