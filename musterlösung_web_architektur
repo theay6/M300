@@ -1,0 +1,13 @@
+---- apache installation ----
+apt-get update
+apt-get upgrade
+apt-get install apache2
+
+----apache konfiguration ----
+#/etc/apache2/apache2.conf ergänzen
+〈Directory "/www/"〉
+  Options Indexes FollowSymLinks
+  Require all granted
+〈/Directory〉
+
+
