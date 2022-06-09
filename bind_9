@@ -1,0 +1,202 @@
+###    ###   ###   ###   ###
+
+###    VMLS3 Bind	 ###
+
+###    ###   ###   ###   ###
+
+Sudo apt -y install bind9                   // Mit Apt Bind9 installieren (-y --> Fragen automatisch mit yes beantworten)
+
+// Optional in der Anleitung wird es nicht gemacht
+cd /etc/bind/                                         // In das Bind Konfigurations Directory wechseln
+
+sudo vi /etc/bind/named.conf.options                  // named.conf.options bearbeiten
+
+// File mit folgenem Inhalt Ergänzen:
+acl goodclients {
+        192.168.220.0/24;       // Definition .220 er Netz
+        192.168.210.0/24;       // Definition .210 er Netz
+        localhost;              // sollte immer dabei sein
+        localnets;
+};
+
+options {
+        directory "/var/cache/bind";                            // Cache DIrectory vom Bind
+        allow-query { goodclients; };                           // Anfragen aus dem Angegebenen Netzen werden angenommen
+        forwarders { 8.8.8.8; };                                // Hier Zuhause mit 8.8.8.8 in der GIBB mit dem GIBB Forwarder ergänzen
+        dnssec-validation auto;                                 // Erhöt die Sicherheit des DNS
+        listen-on { 127.0.0.1; 192.168.220.13; };               // Localhost und IP Addresse vom DNS Master Server
+        allow-recursion {
+                192.168.210.0/24;                               // Da Beide Zonen rächt ähndlich sind sollte das nicht fehlen
+                192.168.220.0/24;
+        };
+};
+
+sudo vi /etc/named/named.conf.local                    // named.conf.options bearbeiten
+
+// File mit folgenem Inhalt Ergänzen:
+//
+// Do any local configuration here
+//
+
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+//include "/etc/bind/zones.rfc1918";
+
+zone "smartlearn.dmz" {
+type master;
+file "/etc/bind/db.smartlearn.dmz";
+};
+
+zone "smartlearn.lan" {
+type master;
+file "/etc/bind/db.smartlearn.lan";
+};
+
+zone "210.168.192.in-addr.arpa" {
+type master;
+file "/etc/bind/db.210.168.192.in-addr.arpa";
+};
+
+zone "220.168.192.in-addr.arpa" {
+type master;
+file "/etc/bind/db.220.168.192.in-addr.arpa";
+};
+
+sudo touch /etc/bind/db.smartlearn.lan                                     // Zonefiles erstellen (Forwardzonefile)
+sudo touch /etc/bind/db.smartlearn.dmz
+sudo touch /etc/bind/db.210.168.192.in-addr.arpa                           // Zonefiles erstellen (Reversezonefile)
+sudo touch /etc/bind/db.220.168.192.in-addr.arpa
+
+sudo vi /etc/bind/db.smartlearn.lan                                     // Ersts Zonefile Bearbeiten (von hostname zu IP)
+
+// File mit folgenem Inhalt Ergänzen:
+$TTL    3M                                                                      // TTL --> Time To Live (da wir daran arbeiten recht klein)
+@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (            // @ --> Lokale Zone IN SOA <fqdn des ns> <email meist root oder hostmaster>
+                              1         ; Serial                                // Serien Nummer dient dem Benutzer
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+        IN      A       192.168.220.13                                          // A Record des NS
+@       IN      NS      vmls3.smartlearn.dmz.                                   // definition des NS
+vmlp1   IN      A       192.168.210.31                                          // A Records aller Clients in diesem Netz
+vmlf1   IN      A       192.168.210.1
+vmls5   IN      A       192.168.210.65
+
+sudo vi /etc/bind/db.smartlearn.dmz
+
+// File mit folgenem Inhalt Ergänzen:
+$TTL    3M
+@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (
+                              1         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+        IN      A       192.168.220.13
+@       IN      NS      vmls3.smartlearn.dmz.
+vmls3   IN      A       192.168.220.13
+vmlf1   IN      A       192.168.220.1
+
+sudo vi /etc/bind/db.210.168.192.in-addr.arpa                                   // Erstes Reverse Zonefile Berabeiten (von IP zu Hostname --> fqdn)
+
+// File mit folgenem Inhalt Ergänzen:
+$TTL    3M
+@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (
+                              1         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      vmls3.smartlearn.dmz.
+1       IN      PTR     vmlf1.smartlearn.lan.
+31      IN      PTR     vmlp1.smartlearn.lan.
+65      IN      PTR     vmls5.smartlearn.lan.
+
+sudo vi /etc/bind/db.220.168.192.in-addr.arpa
+
+// File mit folgenem Inhalt Ergänzen:
+$TTL    3M
+@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (
+                              1         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                          86400 )       ; Negative Cache TTL
+;
+@       IN      NS      vmls3.smartlearn.dmz.
+1       IN      PTR     vmlf1.smartlearn.dmz.
+13      IN      PTR     vmls3.smartlearn.dmz.
+
+sudo systemctl restart bind9.service                                            // Service Neustarten Zuerst checkfile und chekconf aus Tests ausführen
+
+###    ###   ###   ###   ###    ###     ###
+
+###    VMLP1 und LS3 DNS  Settings	###
+
+###    ###   ###   ###   ###    ###     ###
+
+!!!!!! vmls3 !!!!!!     !!!!!! vmls3 !!!!!!     !!!!!! vmls3 !!!!!!
+
+sudo vi /etc/netplan/00-eth0.yaml
+
+// File mit folgenem Inhalt Ergänzen:                                           // Formatierung extrem wichtig !!!
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      addresses: [ 192.168.220.13/24 ]
+      gateway4: 192.168.220.1
+      nameservers:
+        search: [ smartlearn.dmz ]
+        addresses: [ 192.168.220.13 ]
+
+sudo netplan apply                                                              // Netplan applyen damit die Konfiguration angenommen wird
+
+!!!!!! vmlp1 !!!!!!     !!!!!! vmlp1 !!!!!!     !!!!!! vmlp1 !!!!!!
+
+1. Oben Rechts auf das Netzwerk
+2. Kabelgebungen verbunden
+3. LAN-Einstellungen
+4. IPv4
+5. DNS Hinzufügen / 192.168.220.13
+6. Adapter neustarten
+7. nslookup www.google.ch
+
+###    ###   ###   ###   ###    ###
+
+###    VMLS3 Bind  Testen	###
+
+###    ###   ###   ###   ###    ###
+
+named-checkconf                                                         // überprüft die Konfiguration auf fehler --> Kein Output ist  gut
+
+named-checkzone smartlearn.lan /etc/bind/db.smartlearn.lan              // Zonen File überprüfen auf fehler und ob es richtig ladet
+named-checkzone smartlearn.dmz /etc/bind/db.smartlearn.dmz
+named-checkzone 210.168.192.in-addr.arpa /etc/bind/db.210.168.192.in-addr.arpa
+named-checkzone 220.168.192.in-addr.arpa /etc/bind/db.220.168.192.in-addr.arpa
+
+// Erwarteter Output
+zone 210.168.192.in-addr.arpa/IN: loaded serial 1
+OK
+
+systemd-resolved --status
+
+// Erwarteter Output
+Current DNS Server: 192.168.220.13
+         DNS Servers: 192.168.220.13
+          DNS Domain: smartlearn.dmz
+
+dig @192.168.220.13 vmls3.smartlearn.dmz
+dig @192.168.220.13 vmlf1.smartlearn.dmz
+dig @192.168.220.13 vmlp1.smartlearn.lan
+dig @192.168.220.13 vmlf1.smartlearn.lan
+
+nslookup vmls3.smartlearn.dmz
+nslookup vmlf1.smartlearn.dmz
+nslookup vmlf1.smartlearn.lan
+nslookup vmlp1.smartlearn.lan
