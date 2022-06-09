@@ -11,4 +11,26 @@ sudo mv /etc/dhcp/dhcpd.conf{,.backup}
 
 sudo nano /etc/dhcp/dhcpd.conf
 
----- 
+---- [zuhause] vmware dhcp server turn off ----
+linux/ mac --> 
+sudo kill -15 `sudo cat /var/run/vmnet-dhcpd-vmnet1.pid`
+sudo kill -15 `sudo cat /var/run/vmnet-dhcpd-vmnet8.pid`
+windows --> services
+
+---- dhcpd.conf file configuration ----
+
+
+
+
+---- binding the dhcp server to an interface ----
+sudo nano /etc/default/isc-dhcp-server
+INTERFACESv4="eth0"
+
+---- restarting the dhcp server ----
+sudo systemctl restart isc-dhcp-server.service
+
+---- checking status of dhcp server ----
+sudo systemctl status isc-dhcp-server.service
+
+---- troubleshoot ----
+
