@@ -1,0 +1,6 @@
+---- root werden / passwd change ----
+su
+sudo passwd root
+
+
+
