@@ -1,0 +1,142 @@
+###    ###   ###   ###   ###
+
+###    VMLS3 Bind	 ###
+
+###    ###   ###   ###   ###
+
+// Folgende Einträge im File db.smartlearn.lan Hinzufügen:
+www     IN      A       192.168.210.65					
+ku1     IN      A       192.168.210.65
+ku2     IN      A       192.168.210.65
+
+// Folgende Einträge im File db.smartlearn.dmz Hinzufügen:
+www     IN      A       192.168.220.13
+
+sudo systemctl restart bind9.service					// Bind9 Neustarten damit die Files neu gezogen werden (TTL niedrig setzen)
+
+
+
+###    ###   ###   ###   ###
+
+###    VMLS5 Config      ###
+
+###    ###   ###   ###   ###
+	
+sudo apt -y install apache2			// Apache2 mit apt installieren
+
+sudo mkdir -p /www/www.smartlearn.lan/err	// Ordnerstruktur nach Vorgaben erstellen (-p --> Erstelle Alle Ordner vom Pfad die noch nicht existieren)
+sudo mkdir -p /www/ku1.smartlearn.lan/err
+sudo mkdir -p /www/ku2.smartlearn.lan/err
+
+sudo vi /etc/apache2/sites-available/www.smartlearn.lan.conf		// VirtualHost Config File Erstellen (namen ist egal bis auf .conf am schluss)
+
+// Inhalt des Files:
+<VirtualHost *:80>							// Definition VirtualHost
+        ServerAdmin webmaster@localhost					// Email meist gleich wie im Bind9 Zonefile angegeben
+        ServerName www.smartlearn.lan					// Domain Name unter dem die Seite Erreichbar sein sollte
+        DocumentRoot /www/www.smartlearn.lan				// Hier werden die Files abgelegt (index.html usw...)				
+        <Directory /www/www.smartlearn.lan>				// Setzen einiger Berechtigungen für Apache in diesem Ortner
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Require all granted
+        </Directory>
+        ErrorLog /www/www.smartlearn.lan/err/error.log			// Location vom error.log
+        LogLevel warn
+        CustomLog /www/www.smartlearn.lan/err/access.log combined	// Location vom access.log
+</VirtualHost>								// Ende des Virtual Hostes
+
+sudo a2ensite www.smartlearn.lan.conf					// Seite mit a2ensite enablen (erstellt symlink im Ordner /etc/apache2/sites-enabled)
+sudo systemctl restart apache2.service					// Apache2 neustarten (aufpassen bei Produktiven systemen reload verwenden)
+
+// Optional
+sudo vi /www/www.smartlearn.lan/index.html				//  Kleine Testseite  damit man sieht das es funktioniert
+
+sudo vi /etc/apache2/sites-available/ku1.smartlearn.lan.conf		// Config File für den Virtualhost vom ku1 erstellen
+
+// Inhalt des Files:
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        ServerName ku1.smartlearn.lan
+        DocumentRoot /www/ku1.smartlearn.lan
+        <Directory /www/ku1.smartlearn.lan>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Require all granted
+        </Directory>
+        ErrorLog /www/ku1.smartlearn.lan/err/error.log
+        LogLevel warn
+        CustomLog /www/ku1.smartlearn.lan/err/access.log combined
+</VirtualHost>
+
+sudo a2ensite ku1.smartlearn.lan.conf					// Seite mit a2ensite enablen (erstellt symlink im Ordner /etc/apache2/sites-enabled)
+sudo systemctl restart apache2.service					// Apache2 neustarten (aufpassen bei Produktiven systemen reload verwenden)
+
+// Optional
+sudo vi /www/www.smartlearn.lan/index.html				//  Kleine Testseite  damit man sieht das es funktioniert
+
+sudo vi /etc/apache2/sites-available/ku2.smartlearn.lan.conf		// Config File für den Virtualhost vom ku2 erstellen
+
+// Inhhaalt des Files:
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        ServerName ku2.smartlearn.lan
+        DocumentRoot /www/ku2.smartlearn.lan
+        <Directory /www/ku2.smartlearn.lan>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Require all granted
+        </Directory>
+        ErrorLog /www/ku2.smartlearn.lan/err/error.log
+        LogLevel warn
+        CustomLog /www/ku2.smartlearn.lan/err/access.log combined
+</VirtualHost>
+
+sudo a2ensite ku2.smartlearn.lan.conf					// Seite mit a2ensite enablen (erstellt symlink im Ordner /etc/apache2/sites-enabled)
+sudo systemctl restart apache2.service					// Apache2 neustarten (aufpassen bei Produktiven systemen reload verwenden)
+
+// Optional
+sudo vi /www/www.smartlearn.lan/index.html				//  Kleine Testseite  damit man sieht das es funktioniert
+
+###    ###   ###   ###   ###
+
+###    VMLS3 Config      ###
+
+###    ###   ###   ###   ###
+
+sudo apt -y install apache2			// Apache2 mit apt installieren
+sudo mkdir -p /www/www.smartlearn.dmz/err	// Ordnerstruktur nach Vorgaben erstellen (-p --> Erstelle Alle Ordner vom Pfad die noch nicht existieren)
+
+sudo vi /etc/apache2/sites-available/www.smartlearn.dmz.conf		// VirtualHost Config File Erstellen (namen ist egal bis auf .conf am schluss)
+
+// Inhhaalt des Files:
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        ServerName www.smartlearn.dmz
+        DocumentRoot /www/www.smartlearn.dmz
+        <Directory /www/www.smartlearn.dmz>
+                Options Indexes FollowSymLinks MultiViews
+                AllowOverride None
+                Require all granted
+        </Directory>
+        ErrorLog /www/www.smartlearn.dmz/err/error.log
+        LogLevel warn
+        CustomLog /www/www.smartlearn.dmz/err/access.log combined
+</VirtualHost>
+
+sudo a2ensite www.smartlearn.dmz.conf					// Seite mit a2ensite enablen (erstellt symlink im Ordner /etc/apache2/sites-enabled)
+sudo systemctl restart apache2.service					// Apache2 neustarten (aufpassen bei Produktiven systemen reload verwenden)
+
+// Optional
+sudo vi /www/www.smartlearn.lan/index.html				//  Kleine Testseite  damit man sieht das es funktioniert
+
+###    ###   ###   ###   ###
+
+###    VMLP1 Tests	 ###
+
+###    ###   ###   ###   ###
+
+// Firefox mit folgenden Links öffnen:
+http://www.smartlearn.dmz/
+http://www.smartlearn.lan/
+http://ku1.smartlearn.lan/
+http://ku2.smartlearn.lan/
