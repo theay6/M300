@@ -1,0 +1,27 @@
+---- netplan config edit ----
+sudo nano /etc/netplan/00-eth0.yaml
+
+---- netplan vorlage ----
+
+//
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      addresses: [ 192.168.220.13/24 ]
+      gateway4: 192.168.220.1
+      nameservers:
+        search: [ smartlearn.dmz, smartlearn.lan ]
+        addresses: [ 192.168.220.13 ]
+
+//
+
+---- use netplan ----
+sudo netplan apply
+
+---- control ----
+ping vmlp1    --> sollte ganzen namen angeben aber Pakete kommen nicht an DMZ zu LAN
+ping vmlf1    --> Muss zwingend Packete zurück geben
+ping vmls4    --> Muss zwingend Packete zurück geben wenn sie gestartet ist
