@@ -1,0 +1,19 @@
+---- auf VMLS3 den rndc.key kopieren und auf den VMLS4 rüber kopieren. sonst ein neues File mit gleichem Inhalt auf VMLS4 erstellen. wir brauchen nur diesen key ----
+
+sudo nano /etc/dhcpd.conf
+
+---- unter "authoritative den Inhalt hinzufügen zum Beispiel ----
+
+
+
+zone smartlearn.lan {
+  primary 102.168.220.13;
+    key rndc-key;
+}
+
+zone 210.168.192.in-addr.arpa {
+  primary 192.168.220.13;
+  key rndc-key;
+}
+
+
