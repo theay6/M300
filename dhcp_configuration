@@ -1,0 +1,14 @@
+###    ###   ###   ###   ###
+
+###        VMLS4         ###
+
+###    ###   ###   ###   ###
+
+sudo apt install isc-dhcp-server
+
+---- always good to backup original configuration files ----
+sudo mv /etc/dhcp/dhcpd.conf{,.backup}
+
+sudo nano /etc/dhcp/dhcpd.conf
+
+---- 
