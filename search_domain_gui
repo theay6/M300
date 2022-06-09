@@ -1,0 +1,16 @@
+---- Open a Terminal ctrl + t ----
+nm-connection-editor
+
+---- Nun sollte sich ein Fenster öffnen ----
+1. unten Links auf + drücken
+2. Ethernet und Erstellen drücken
+3. Namen der Verbundung eingeben
+4. Gerät auswählen (meist eth0)
+5. Oben dem Verbindungsnamen in der Leiste IPv4-Einstellungen
+6. Methode Manuell einstellen Manuell
+7. Rechts in der Mitte auf Hinzufügen Klicken
+8. Adresse / Netmaske (24) / Gateway
+9. DNS einstellen (IP-Adresse)
+10. Searchdomain einstellen
+11. Speichern Klicken
+12. Oben Kabelgebungene Verbindung Profil einstellen
