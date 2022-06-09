@@ -1,0 +1,66 @@
+VMLS3
+Proftod.conf
+# /etc/proftpd/proftpd. conf -- This is a basic ProFTPD configuration file.
+# To really apply changes, reload proftpd after modifications, if
+# it runs in daemon mode. It is not required in inetd/xinetd mode.
+# Includes SO modules
+Include /etc/proftpd/modules.conf
+# Set off to disable IPV6 support which is annoying on IPV4 only boxes.
+USseIPv6
+on
+# If set on you can experience a longer connection delay in many cases.
+Ident Lookups
+off
+ServerName
+ServerType
+DeferWelcome
+"ftp.gibbix.dmz"
+standalone
+off
+MultilineRFC2228
+DefaultServer
+ShowSymlinks
+on
+on
+on
+TimeoutNoTransfer
+TimeoutStalled
+TimeoutIdle
+600
+600
+1200
+DisplayLogin
+DisplayChdir
+Listoptions
+welcome.msg
+. message true
+"_]"
+DenyFilter
+# Use this to jail all users in their homes
+DefaultRoot
+/www/www.gibbix.dmz/
+‹Directory /www*>
+Umask 022
+Allowverwrite on
+</Directory>
+<Limit LOGIN>
+Order allow, deny
+AllowUser ftpuser
+DenyA11
+</Limit>
+Vmls5
+Proftpd.conf
+ServerName
+DefaultRoot
+"ftp.gibbix.lan"
+/www/
+‹Directory /Www>
+Umask 022
+Allowoverwrite on
+<Limit Login>
+Order allow, deny
+AllowUser ftpuser
+DenyAll
+</Limit›
+</Directory›
+RequireValidShell Off
