@@ -1,152 +1,90 @@
 # SFTP mit ProFPT auf Port 2222
-es braucht
-die
-Group wwwadmin
-apache
-Falls nicht installiert
-# apt install -y apache2
+____
+
+es braucht die Group wwwadmin apache
+
+--- Falls nicht installiert ---
+apt install -y apache2
 groupadd wwwadmin
-alles
-als root
-sudo
-su
+
+--- alles als root ---  
+sudo su
+
 apt update
 apt install proftpd
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56
-57
-58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
+
 "normales FTP"
 ========:==:=====
-in /etc/proftod. conf anpassen:
-ServerName "ftp.proftpd. dmz"
-Umask 002
-002
-in
-/etc/proftpd/conf.d site. conf anlegen:
+
+---- in /etc/proftod.conf anpassen: ----
+
+ServerName "ftp.proftpd.dmz"
+Umask 002  002
+
+---- in /etc/proftpd/conf.d site.conf anlegen: ----
 nano site.conf
-DefaultRoot
-Authorder
-AuthuserFile/etc/proftpd/ftpd.passwd
+
+DefaultRoot ~ 
+Authorder         mod_auth_file.c
+AuthuserFile /etc/proftpd/ftpd.passwd
 AuthPAM off
 RequireValidshell off
-mod auth file.c
-ftpd.passwd erzeugen: gid 1002
-wwwadmin, uid 33
-= www-data
+
+ftpd.passwd erzeugen: gid 1002 = wwwadmin, uid 33 = www-data
+
 cd /etc/proftpa
-ftpasswd -passwd -name ftpuser -gid 1002 -uid 33
--home /www/www.smartlearn.dmz
+ftpasswd -passwd -name ftpuser -gid 1002 -uid 33 -home /www/www.smartlearn.dmz
 -shell /bin/false
+
 systemctl restart proftpd. service
-testen!
-2.
-mod sftpd
+
+---- testen! ----
+2. mod sftpd
 --
 =========
-separete keys
-erzeugen (ist einfacher)
-ssh-keygen -m PEM -f /etc/ssh/sftp_host _rsa key
--N
-ssh-keygen
--m PEM
--f /etc/ssh/sftp_host_ dsa key
--N
--t rsa
--b 2048
--t dsa
--b 1024
-in
-/etc/proftpd/conf.d sftpd.conf anlegen:
+separete keys erzeugen (ist einfacher)
+ssh-keygen -m PEM -f /etc/ssh/sftp_host _rsa key -N '' -t rsa -b 2048
+ssh-keygen -m PEM -f /etc/ssh/sftp_host _dsa key -N '' -t dsa -b 1024
+
+---- in /etc/proftpd/conf.d sftpd.conf anlegen: ----
+
 «IfModule mod sftp.c>
-SFTPEngine on
-Port 2222
-# Log file
-SFTPLog/var/log/proftpd/sftp.log
-# Configure both the RSA and DSA host keys; using the same host key
-#
-files that OpenSSH uses.
-SFTPHostKey /etc/ssh/sftp host rsa key
-SFTPHostKey /etc/ssh/sftp host dsa key
-SFTPAuthorizedUserKeys file: /etc/proftpd/authorized keys/%u
-Enable compression
-SFTPCompression delayed
-# Default is: publickey password
-SFTPAuthMethods publickey
-password
+    
+    SFTPEngine on
+    Port 2222
+    
+    # Log file
+    SFTPLog/var/log/proftpd/sftp.log
+
+    # Configure both the RSA and DSA host keys; using the same host key
+    # files that OpenSSH uses.
+    SFTPHostKey /etc/ssh/sftp host rsa key
+    SFTPHostKey /etc/ssh/sftp host dsa key
+
+    SFTPAuthorizedUserKeys file: /etc/proftpd/authorized keys/%u
+    # Enable compression
+    SFTPCompression delayed
+    # Default is: publickey password
+  SFTPAuthMethods publickey password
+
 </IfModule>
+
 mkdir /etc/proftpd/authorized_ keys/
+
 systemctl restart proftpd
-testen mit
-sftp
--P 2222 ftpuser@vmls3 oder grafischem Klient
-"normales FTP"
-abschalten
-======:::::::
-======:::::::
+
+--- testen mit ----
+sftp -P 2222 ftpuser@vmls3 oder grafischem Klient
+
+--- "normales FTP" abschalten ---
+
 cd /etc/proftpd
 nano nano proftpd.conf
 Port
-anwei sung auskommentieren:
-#Port
-21
+anweisung auskommentieren:
+#Port 21
+
 systemctl restart proftpd
+
 testen! ftp darf nicht mehr gehen
 
