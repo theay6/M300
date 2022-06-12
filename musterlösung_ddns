@@ -1,1 +1,47 @@
-dddd
+Vmls3
+Named.conf.local
+include
+"/etc/bind/rndc. key" ;
+zone "gibbix.lan" in {
+type master;
+file
+"/var/cache/bind/db.gibbix.lan";
+allow-update { key rndc-key; }; };
+zone "210.168.192.in-addr.arpa" in (
+type master;
+file
+"/var/cache/bind/db.192.168.210";
+allow-update { key rndc-key; }; };
+zone "gibbix.dmz" in {
+type master;
+file
+"/etc/bind/db.gibbix.dmz";};
+zone "220.168.192.in-addr.arpa" in {
+type master;
+file
+"/etc/bind/db.192.168.220";};
+VMLS4
+Dhcpd.conf
+# DHCP-Konfiguration fur gibbix.lan
+# RNDC. key
+include "/etc/dhcp/rndc.key";
+#gemeinsame Optionen
+ddns-update-style interim;
+ddns-updates on;
+ignore client-updates;
+update-static-leases on;
+option domain-name
+"gibbix.lan";
+option domain-search "gibbix.lan";
+option domain-name-serversns.gibbix.dmz;
+option routers 192.168.210.1;
+option broadcast-address192.168.210.255;
+option subnet-mask255.255.255.0;
+default-lease-time600;
+•max-lease-time 7200;
+authoritative;
+log-facility local7;
+# statische Adressen gibbix.lan
+subnet 192.168.210.0 netmask 255.255.255.0 (
+range 192.168.210.100 192.168.210.200;
+host vmL55 {
