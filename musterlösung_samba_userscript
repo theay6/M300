@@ -1,4 +1,5 @@
 Shellscript zum Erstellen der User/Shares und Setzen der Permissions:
+
 #!/bin/bash
 PASSWORD=" sm112345"
 groupadd tuxies
@@ -7,66 +8,24 @@ groupadd tuxmens
 groupadd violenttux
 useradd -m -p $PASSWORD -g tuxies -G tuxladies, violenttux laratux
 useradd -m -p $PASSWORD -g tuxies -G tuxladies cutetux
-useradd
--m
--p $PASSWORD
--g tuxies
--G tuxmens, violenttux mrtux
-useradd
-=n
--p $PASSWORD
--g tuxies
--G tuxmens, violenttux rambotux
-useradd
-useradd
--p $PASSWORD -g tuxies -G tuxmens, violenttux luketux
--m
-SPASSWORD
--g tuxies
--G tuxmens slashtux
-useradd
--m -p $PASSWORD -g tuxies -G tuxladies divatux
-echo
--ne
-"$PASSWORD \ n$PASSWORD\n"
-smbpasswd-a
--S laratux
-echo
--ne
-"$PASSWORD\n$PASSWORD \n"
-smbpasswd
--a
--S cutetux
-echo
--ne
-"§PASSWORD\n$PASSWORD\n"
-smbpasswd-a
--S mrtux
-echo
--ne
-"PASSWORD\n$PASSWORD\n"
-smbpasswd
--a
--s rambotux
-echo
--ne
-"$PASSWORD\n$PASSWORD\n"
-smopasswd
--a
--S luketux
-echo
--ne
-"§PASSWORD\n$PASSWORD\n"
-smbpasswd
--a
--s slashtux
-echo
--ne
-"PASSWORD\ n$PASSWORD \n"
-smbpasswd -a -s divatux
+useradd -m -p $PASSWORD -g tuxies -G tuxmens, violenttux mrtux
+useradd -m -p $PASSWORD -g tuxies -G tuxmens, violenttux rambo
+useradd -m -p $PASSWORD -g tuxies -G tuxmens, violenttux luketux
+useradd -m -p $PASSWORD -g tuxies -G tuxmens slashtux
+useradd -m -p $PASSWORD -g tuxies -G tuxmens divatux
+
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s laratux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s cutetux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s mrtux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s rambotux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s luketux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s slashtux
+echo -ne "PASSWORD\n$PASSWORD\n" | smbpasswd -a -s divatux
+
 mkdir/var/smbshr
 cd /var/smbshr
 mkdir tuxplanet ladiesplace mensplace scratch music
+
 chgrp tuxies tuxplanet
 chgrp tuxladies ladiesplace
 chgrp tuxmens mensplace
@@ -74,19 +33,70 @@ chgrp violenttux scratch
 chgrp tuxies music
 chmod 2770 tuxplanet ladiesplace mensplace scratch
 chmod 2755 music
+
 /etc/samba/smb.conf
+
 [global]
-workgroup = SMBWRKG
-#netbios name = SMBSRV1
-server string = SMBSRV1
-log file = /var/log/samba/log.%m
-max log size = 1000
-encrypt passwords = true
-wins support = yes
-local master = yes
-preferred master = yes
-map to guest = bad user
+  workgroup = SMBWRKG
+  #netbios name = SMBSRV1
+  server string = SMBSRV1
+  log file = /var/log/samba/log.%m
+  max log size = 1000
+  encrypt passwords = true
+  wins support = yes
+  local master = yes
+  preferred master = yes
+  map to guest = bad user
+ 
 [testshare]
-comment = testshare
-path = /home/vmadmin/testshare
-browseable = yes
+  comment = testshare
+  path = /home/vmadmin/testshare
+  browseable = yes
+  read only = no
+  guest ok = no
+  valid users = vmadmin
+  
+  [tuxplanet]
+  path = /var/smbshr/tuxplanet
+  valid users = @tuxies
+  write list @tuxies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+ 
+ [ladiesplace]
+  path = /var/smbshr/ladiesplace
+  valid users = @tuxladies
+  write list @tuxladies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+
+  [mensplace]
+  path = /var/smbshr/mensplace
+  valid users = @tuxmens
+  write list @tuxmens
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+  
+  [scratch]
+  path = /var/smbshr/scratch
+  valid users = @violenttux
+  write list @violenttux
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+  
+  [music]
+  path = /var/smbshr/music
+  valid users = @tuxies
+  write list @tuxies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
