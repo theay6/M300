@@ -1,0 +1,186 @@
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig Host PC    ###
+###                     ###
+### ### ### ### ### ### ###
+
+// VMware DHCP deaktivieren
+1. Dienste (Service)
+2. VMware DHCP Service (Deaktivieren)
+3. (Optional Auf Manuell setzen)
+
+
+
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig vmLs4      ###
+###                     ###
+### ### ### ### ### ### ###
+
+
+// Maschine Aktuallisieren
+sudo apt -y update && sudo apt -y upgrade
+
+// ISC-DHCP installieren
+sudo apt-get install isc-dhcp-server
+
+// mit ifconfig Netzwerk interface herausfinden
+1. ifconfig
+2. Interface Namen Kopieren
+
+// /etc/default/isc-dhcp-server interface überprüfen
+sudo vi /etc/default/isc-dhcp-server
+
+# Folgende Zeilen Hinzufügen (Interface Namen dementschprechen anpassen)
+-------------------------------
+INTERFACESv4="eth0"
+INTERFACESv6="eth0"
+-------------------------------
+
+// MAC Adressen von Statischen IPs Herausfinden (mac in Textfile speichhern)
+1. ssh auf entsprechende Maschine
+2. wenn smartlearn .bashrc wird die mac automatisch Unten Rechhts ausgegeben
+3. Nicht smartlearn .bashrc (ifconfig zeile ether .... kopieren)
+
+// DHCP.conf File Bearbeiten
+sudo vi /etc/dhcp/dhcpd.conf
+
+# Folgende Zeilen Hinzufügen (Interface Namen dementschprechen anpassen)
+-------------------------------
+#Generelle Einstellungen
+include "/etc/dhcp/rndc.key";
+
+ddns-updates on;
+ddns-update-style interim;
+ddns-domainname "smartlearn.lan.";
+use-host-decl-names on;
+
+zone smartlearn.dmz. {
+	primary 192.168.220.13;
+	key rndc-key;
+}
+
+zone 220.168.192.in-addr.arpa. {
+	primary 192.168.220.13;
+	key rndc-key;
+}
+
+# Rogue-DHCP-Server nicht erlauben (siehe oben)
+authoritative;
+
+# Definition des ersten (einzigen) Subnetzes
+subnet 192.168.210.0 netmask 255.255.255.0 {
+        range 192.168.210.100 192.168.210.200;
+        interface eth0;
+        # Lease-Time (in Sekunden)
+        default-lease-time 600;
+        max-lease-time 7200;
+        option domain-name "smartlearn.lan";
+        option domain-name-servers 192.168.210.13;
+        option broadcast-address 192.168.210.255;
+        option subnet-mask 255.255.255.0;
+        option routers 192.168.210.1;
+}
+
+# IP eines Hosts an seine MAC festnageln
+host vmls5 {
+        hardware ethernet 00:50:56:00:24:41;
+        fixed-address 192.168.210.65;
+        option host-name "vmls5";
+}
+
+-------------------------------
+
+
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig vmLs3      ###
+###                     ###
+### ### ### ### ### ### ###
+
+// Bind named.conf.local bearbeiten
+sudo vi /etc/bind/named.conf.local
+
+# Folgende Zeilen bei smartlearn.lan und smartlearn.dmz Hinzufügen
+-------------------------------
+zone "smartlearn.dmz" {
+type master;
+file "/etc/bind/db.smartlearn.dmz";
+allow-update { key rndc-key; };
+};
+
+zone "smartlearn.lan" {
+type master;
+file "/etc/bind/db.smartlearn.lan";
+allow-update { key rndc-key; };
+};
+-------------------------------
+
+// rndc Key erstellen usw...
+sudo rndc-confgen
+
+# Ausgabe Kopieren
+
+// Berechtigungen setzen
+sudo chmod 660 /etc/bind/rndc.conf
+sudo chown root:bind /etc/bind/rndc.conf
+
+
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig vmLs4      ###
+###                     ###
+### ### ### ### ### ### ###
+
+// File rndc.conf von vmls3 kopieren
+sudo vi /etc/dhcp/rndc.key
+2. Inhalt einfügen (oder mit scp)
+sudo chmod 660 /etc/dhcp/rndc.conf
+
+
+// Services neustarten
+vmls3:  sudo systemclt restrat bind9
+vmls4:  sudo /etc/init.d/isc-dhcp-server stop
+        sudo /etc/init.d/isc-dhcp-server start
+ 
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig vmLp1      ###
+###                     ###
+### ### ### ### ### ### ###
+
+// nm connection editor Profil ändern
+sudo nm-connection-editor
+ipv2 auf automatisch dhcp setzen
+
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig vmLs5      ###
+###                     ###
+### ### ### ### ### ### ###
+
+// netplan bearbeiten
+sudo vi /etc/netplan/00-eth0.yaml
+
+# Folgende Zeilen Hinzufügen (Interface Namen dementschprechen anpassen)
+-------------------------------
+network:
+    version: 2
+    renderer: networkd
+    ethernets:
+        eth0:
+            dhcp4: true
+-------------------------------
+
+// netplan anwenden
+sudo netplan apply
+
+### ### ### ### ### ### ###
+###                     ###
+###   Konfig Testen     ###
+###                     ###
+### ### ### ### ### ### ###
+
+alle vms neustarten auserrt vmls3, vmls4
+wenn die vmlp1 die 100er addresse bekommt ist alles gut
+wenn vmls5 die gleiche ip bekommt ist alles gut
