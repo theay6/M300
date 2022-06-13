@@ -1,0 +1,3 @@
+Die Formel des Hosts lautet 2h - 2. 
+Das h steht für die Anzahl der Nullen in der Subnetzmaske, wenn diese in Binärwerte umgewandelt würde. D
+ie erste und die letzte Adresse sind reserviert: die erste, um das Netzwerk zu identifizieren, und die letzte, um als Broadcast-Adresse verwendet zu werden.
