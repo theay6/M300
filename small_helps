@@ -2,5 +2,6 @@
 su
 sudo passwd root
 
+ssh vmadmin@192.168....
 
 
