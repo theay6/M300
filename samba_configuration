@@ -1,0 +1,154 @@
+---vmls4---
+
+sudo apt update
+sudo apt install samba smbclient
+
+cd /home/vmadmin/
+mkdir testshare
+
+cd /etc/samba/
+sudo cp smb.conf orig_smb.conf
+
+sudo nano smb.conf
+
+# Auf Zeile 29 anpassen:
+   workgroup = SMBWRKG
+
+# Auf Zeile 32 anpassen:
+   server string = SMBSRV1
+
+# Am Ende des Files hinzufügen
+[testshare]
+   comment = testshare auf vmLS4
+   path = /home/vmadmin/testshare/
+   read only = no
+   guest ok = yes
+
+--- samba server restart ---
+sudo service smbd restart
+
+--- samba user für vmadmin anlegen ---
+sudo smbpasswd -a vmadmin
+
+--- originale config datei in testshare kopieren ---
+sudo cp orig_smb.conf /home/vmadmin/testshare/
+
+* --- samba share auf funktionalität prüfen --- * ///// optional
+smbclient //localhost/testshare
+
+smb: \> ls
+
+----- user und gruppen erstellen: ----
+
+#gruppen
+sudo groupadd tuxies
+sudo groupadd tuxladies
+sudo groupadd tuxmens
+sudo groupadd violenttux
+
+#unix user
+sudo useradd -m -p "sml12345" -g tuxies -G tuxladies,violenttux laratux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxladies cutetux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxmens,violenttux mrtux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxmens,violenttux rambotux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxmens,violenttux luketux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxmens slashtux
+sudo useradd -m -p "sml12345" -g tuxies -G tuxladies divatux
+
+#samba user
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s laratux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s cutetux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s mrtux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s rambotux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s luketux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s slashtux
+echo -ne "sml12345\nsml12345\n" | sudo smbpasswd -a -s divatux
+
+---- share directories erstellen ----
+#in /var/
+sudo mkdir smbshr
+
+#in /var/smbshr/
+#directories erstellen
+sudo mkdir tuxplanet ladiesplace mensplace scratch music
+
+#Berechtigungen einstellen
+sudo chgrp tuxies tuxplanet
+sudo chgrp tuxladies ladiesplace
+sudo chgrp tuxmens mensplace
+sudo chgrp violenttux scratch
+sudo chgrp tuxies music
+sudo chmod 2770 tuxplanet ladiesplace mensplace scratch
+sudo chmod 2755 music
+
+---- folgende Zeilen in config file anpassen ----
+#Bei [global] anpassen oder hinzufügen:
+  encrypt passwords = true
+  wins support = yes
+  local master = yes
+  preferred master = yes
+  map to guest = bad user
+
+#Am Ende des files anfügen
+[testshare]
+  comment = testshare
+  path = /home/vmadmin/testshare
+  browseable = yes
+  read only = no
+  guest ok = no
+  valid users = vmadmin
+  
+[tuxplanet]
+  path = /var/smbshr/tuxplanet
+  valid users = @tuxies
+  write list @tuxies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+ 
+[ladiesplace]
+  path = /var/smbshr/ladiesplace
+  valid users = @tuxladies
+  write list @tuxladies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+
+[mensplace]
+  path = /var/smbshr/mensplace
+  valid users = @tuxmens
+  write list @tuxmens
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+  
+[scratch]
+  path = /var/smbshr/scratch
+  valid users = @violenttux
+  write list @violenttux
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+  
+[music]
+  path = /var/smbshr/music
+  valid users = @tuxies
+  write list @tuxies
+  read only = No
+  create mask = 0770
+  directory mask = 0770
+  guest ok = No
+
+---- samba server neu starten ----
+testparm ////optional
+
+sudo service smbd restart
+sudo service nmbd restart
+
+
+
+
