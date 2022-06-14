@@ -1,0 +1,17 @@
+;
+; BIND reverse data file for local loopback interface
+;
+$TTL    604800
+@       IN      SOA     vmls2.m300test.dmz. root.m300test.dmz. (
+                              1         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      vmls2.m300test.lan.
+
+10.5    IN      PTR     vmlp1.m300test.lan.
+11.5    IN      PTR     vmwp1.m300test.lan.
+10.4    IN      PTR     vmls3.m300test.lan.
+1.4     IN      PTR     vmlf1.m300test.lan.
