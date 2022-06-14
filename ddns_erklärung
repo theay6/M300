@@ -1,0 +1,15 @@
+---vmls3---
+---root werden---
+cd /etc/bind
+ls
+cat rndc.key
+
+---selber eins generieren, wenn nicht vorhanden---
+rndc-confgen -a
+
+---vmls4---
+cd /etc/bind
+---diesen Inhalt/ File ins ls4 kopieren oder neu generieren mit copy paste---
+sudo nano dhcpd.conf
+
+
