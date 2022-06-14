@@ -4,4 +4,6 @@ sudo passwd root
 
 ssh vmadmin@192.168....
 
+tail -f /var/log/syslog
+
 
