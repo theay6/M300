@@ -70,17 +70,17 @@ sudo touch /etc/bind/db.220.168.192.in-addr.arpa
 sudo vi /etc/bind/db.smartlearn.lan                                     // Ersts Zonefile Bearbeiten (von hostname zu IP)
 
 // File mit folgenem Inhalt Ergänzen:
-$TTL    3M                                                                      // TTL --> Time To Live (da wir daran arbeiten recht klein)
-@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (            // @ --> Lokale Zone IN SOA <fqdn des ns> <email meist root oder hostmaster>
-                              1         ; Serial                                // Serien Nummer dient dem Benutzer
+$TTL    3M                                                                      
+@       IN      SOA     vmls3.smartlearn.dmz. root.smartlearn.dmz. (             
+                              1         ; Serial                                
                          604800         ; Refresh
                           86400         ; Retry
                         2419200         ; Expire
                           86400 )       ; Negative Cache TTL
 ;
-        IN      A       192.168.220.13                                          // A Record des NS
-@       IN      NS      vmls3.smartlearn.dmz.                                   // definition des NS
-vmlp1   IN      A       192.168.210.31                                          // A Records aller Clients in diesem Netz
+        IN      A       192.168.220.13                                          
+@       IN      NS      vmls3.smartlearn.dmz.                                  
+vmlp1   IN      A       192.168.210.31                                          
 vmlf1   IN      A       192.168.210.1
 vmls5   IN      A       192.168.210.65
 
